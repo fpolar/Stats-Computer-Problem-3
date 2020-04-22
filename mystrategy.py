@@ -7,6 +7,8 @@
 #  * spread first 10*N tests uniformly over options
 #  * then always select option with max score (ignore tie)
 
+import numpy as np
+
 VERSION = '0.1.1'
 
 class Strategy:
@@ -17,16 +19,23 @@ class Strategy:
     self.N = N
     self.state = [0]*N
     self.trials = trials
+    self.exploreThreshold = trials/10*N
+    self.epsilon = .1
+    # print(N)
+    # print(trials)
 
 
   # use your state information to select an option
   # k: current trial # (0-index)
   def select(self, k):
-    if k < 10 * self.N:
+    # print(self.state)
+    if k < self.exploreThreshold:
       # explore
       return int(k/10)
     else:
       # exploit
+      if np.random.random() < self.epsilon:
+      	return np.random.randint(self.N)
       return(self.state.index(max(self.state)))
 
 
