@@ -18,9 +18,11 @@ class Strategy:
   def __init__(self, N, trials):
     self.N = N
     self.state = [0]*N
+    self.p = [0]*N
     self.trials = trials
-    self.exploreThreshold = trials/10*N
-    self.epsilon = .1
+    self.exploreThreshold = N*10
+    self.epsilon = .05
+    self.epsilonDecay = .1/trials
     # print(N)
     # print(trials)
 
@@ -29,6 +31,9 @@ class Strategy:
   # k: current trial # (0-index)
   def select(self, k):
     # print(self.state)
+    if k >= self.exploreThreshold:
+      #setup probabilties
+      self.p = [n/self.exploreThreshold for n in self.state]
     if k < self.exploreThreshold:
       # explore
       return int(k/10)
@@ -36,10 +41,13 @@ class Strategy:
       # exploit
       if np.random.random() < self.epsilon:
       	return np.random.randint(self.N)
-      return(self.state.index(max(self.state)))
+      return(self.p.index(max(self.p)))
+      # return(self.state.index(max(self.state)))
 
 
   # record the reward for trial k
   # idx is your selected option (so you dont need to track within select)
   def record(self, reward, idx, k):
     self.state[idx] += reward
+    self.p[idx] += reward/(k+1)
+    self.epsilon -= self.epsilonDecay
